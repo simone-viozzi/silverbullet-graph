@@ -17,6 +17,7 @@
   },
   "imports": {
     "@silverbulletmd/silverbullet": "jsr:@silverbulletmd/silverbullet@^0.10.0",
-    "$sb/": "https://deno.land/x/silverbullet@0.10.1/plug-api/"
+    "$sb/": "https://deno.land/x/silverbullet@0.10.1/plug-api/",
+    "gitignore-parser": "https://esm.sh/gitignore-parser@0.0.2"
   }
 }
