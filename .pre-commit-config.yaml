@@ -5,36 +5,22 @@ repos:
         name: Deno Format
         entry: deno fmt
         language: system
-        always_run: true
-        pass_filenames: false
+        pass_filenames: true
+        types_or: [ts, tsx]
 
       - id: deno-lint
         name: Deno Lint
-        entry: "deno lint **/*.ts"
+        entry: deno lint
         language: system
-        always_run: true
-        pass_filenames: false
+        pass_filenames: true
+        types_or: [ts, tsx]
 
       - id: deno-check
         name: Deno Type Check
-        entry: "deno check **/*.ts"
+        entry: deno check
         language: system
-        always_run: true
-        pass_filenames: false
-
-      #- id: deno-test
-      #  name: Deno Test
-      #  entry: deno task test
-      #  language: system
-      #  always_run: true
-      #  pass_filenames: false
-
-      #- id: deno-build
-      #  name: Deno Build
-      #  entry: deno task build
-      #  language: system
-      #  always_run: true
-      #  pass_filenames: false
+        pass_filenames: true
+        types_or: [ts, tsx]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
