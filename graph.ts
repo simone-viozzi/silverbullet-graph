@@ -22,6 +22,9 @@ export async function getGraphSettings(): Promise<{
   // Compila il filtro gitignore
   const fileFilterFn = gitIgnoreCompiler(excludeRegex.join("\n")).accepts;
 
+  console.log(fileFilterFn);
+  console.log(excludeTags);
+
   return {
     fileFilterFn,
     excludeTags,
@@ -29,13 +32,13 @@ export async function getGraphSettings(): Promise<{
 }
 
 export async function saveGraph() {
-  // Recupera la configurazione dello spazio per il filtro gitignore
-  const spaceConfig = await space.getConfig();
-  const fileFilterFn = gitIgnoreCompiler(spaceConfig.spaceIgnore).accepts;
+  // Ottieni le impostazioni del grafo
+  const { fileFilterFn, excludeTags } = await getGraphSettings();
 
   // Recupera tutte le pagine nello spazio
   const pages = (await space.listPages()).filter((page) =>
-    fileFilterFn(page.name)
+    fileFilterFn(page.name) &&
+    !page.tags?.some((tag) => excludeTags.includes(tag))
   );
 
   // Recupera tutti i link salvati nel datastore
