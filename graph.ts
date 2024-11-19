@@ -13,17 +13,18 @@ export async function getGraphSettings(): Promise<{
   fileFilterFn: (filename: string) => boolean;
   excludeTags: string[];
 }> {
-  // Leggi le impostazioni dal file SETTINGS.md
-  const excludeRegex =
-    (await system.getSpaceConfig("graph.excludeRegex", [])) as string[];
-  const excludeTags =
-    (await system.getSpaceConfig("graph.excludeTags", [])) as string[];
+  const config = await system.getSpaceConfig();
+
+  console.log("Full Space Config:", JSON.stringify(config, null, 2));
+
+  const excludeRegex = config.graph?.excludeRegex || [];
+  const excludeTags = config.graph?.excludeTags || [];
 
   // Compila il filtro gitignore
   const fileFilterFn = gitIgnoreCompiler(excludeRegex.join("\n")).accepts;
 
-  console.log(fileFilterFn);
-  console.log(excludeTags);
+  console.log("Compiled fileFilterFn:", fileFilterFn);
+  console.log("Exclude Tags:", excludeTags);
 
   return {
     fileFilterFn,
