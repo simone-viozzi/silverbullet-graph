@@ -1,7 +1,9 @@
 import { CodeWidgetContent } from "@silverbulletmd/silverbullet/types";
-import { syscall } from "@silverbulletmd/silverbullet/syscalls";
-import { datastore, editor, asset } from "@silverbulletmd/silverbullet/syscalls";
-
+import {
+  asset,
+  datastore,
+  editor,
+} from "@silverbulletmd/silverbullet/syscalls";
 
 // Comando per salvare un grafo nel datastore
 export async function saveGraph() {
@@ -34,22 +36,27 @@ export async function clearGraphData() {
 }
 
 export async function widget(
-  bodyText: string,
-  pageName: string,
+  _bodyText: string,
+  _pageName: string,
 ): Promise<CodeWidgetContent> {
   const graphData = await datastore.get(["graph", "main"]);
 
   if (!graphData) {
     return {
-      html: `<div>Graph data not found in datastore. Please save a graph first!</div>`,
+      html:
+        `<div>Graph data not found in datastore. Please save a graph first!</div>`,
     };
   }
 
   // Carica il file JS come asset
-  const graphWidgetJs = await asset.readAsset("graph", "assets/graph_widget.js");
+  const graphWidgetJs = await asset.readAsset(
+    "graph",
+    "assets/graph_widget.js",
+  );
 
   return {
-    html: `<div id="graph-container" style="width: 100%; height: 500px; border: 1px solid #ccc;"></div>`,
+    html:
+      `<div id="graph-container" style="width: 100%; height: 500px; border: 1px solid #ccc;"></div>`,
     script: `
       loadJsByUrl("https://d3js.org/d3.v7.min.js").then(() => {
         ${graphWidgetJs}
