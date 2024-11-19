@@ -1,6 +1,22 @@
-name: hello
+name: graph
+version: 0.1
+imports:
+  - https://get.silverbullet.md/global.plug.json
+assets:
+  - "assets/**/*.*"
 functions:
-  helloWorld:
-    path: hello.ts:helloWorld
+  saveGraph:
+    path: graph.ts:saveGraph
     command:
-      name: "Say hello"
+      name: Save Graph
+  clearGraphData:
+    path: graph.ts:clearGraphData
+    command:
+      name: Clear Graph Data
+  graphWidget:
+    path: graph.ts:widget
+    codeWidget: graph
+  hello:
+    path: hello.ts:hello
+    command:
+      name: hello
