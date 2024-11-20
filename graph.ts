@@ -3,7 +3,6 @@ import {
   asset,
   datastore,
   editor,
-  space,
   system,
 } from "@silverbulletmd/silverbullet/syscalls";
 
@@ -14,8 +13,6 @@ export async function getGraphSettings(): Promise<{
   excludeTags: string[];
 }> {
   const config = await system.getSpaceConfig();
-
-  console.log("Full Space Config:", JSON.stringify(config, null, 2));
 
   const excludeRegex = config.graph?.excludeRegex || [];
   const excludeTags = config.graph?.excludeTags || [];
@@ -36,29 +33,65 @@ export async function saveGraph() {
   // Ottieni le impostazioni del grafo
   const { fileFilterFn, excludeTags } = await getGraphSettings();
 
-  // Recupera tutte le pagine nello spazio
-  const pages = (await space.listPages()).filter((page) =>
-    fileFilterFn(page.name) &&
-    !page.tags?.some((tag) => excludeTags.includes(tag))
+  // Recupera tutte le pagine usando `index.queryObjects`
+  const pages = await system.invokeFunction("index.queryObjects", "page") as {
+    name: string;
+    tags: string[];
+    created: string;
+    lastModified: string;
+  }[];
+
+  console.log("pages ok");
+
+  // Filtra le pagine basandosi sul filtro file e sui tag esclusi
+  const filteredPages = pages.filter(
+    (page) =>
+      fileFilterFn(page.name) &&
+      !page.tags.some((tag) => excludeTags.includes(tag)),
   );
 
-  // Recupera tutti i link salvati nel datastore
+  console.log("pages filtered");
+
+  // Recupera tutti i link dal datastore
   const allLinks = await datastore.query({ type: "link" });
 
-  // Filtro: prendi solo i link con il tag "link" e una destinazione valida
-  const links = allLinks
-    .filter((entry) => entry.value.tag === "link" && entry.value.toPage?.trim())
-    .map((entry) => ({
-      source: entry.value.page, // La pagina di origine
-      target: entry.value.toPage, // La pagina di destinazione
-    }))
-    .filter((link) => fileFilterFn(link.source) && fileFilterFn(link.target)); // Filtra i link basati sulle pagine incluse
+  console.log("link ok");
 
-  // Costruisci i nodi con metadati delle pagine
-  const nodes = pages.map((page) => ({
+  // Costruisci i collegamenti
+  const links = allLinks
+    .filter((entry) => {
+      try {
+        // Controlla che i valori esistano e siano stringhe non vuote
+        const source = entry.value?.page;
+        const target = entry.value?.toPage;
+
+        if (
+          !source || typeof source !== "string" || !target ||
+          typeof target !== "string"
+        ) {
+          console.warn("Invalid link entry:", entry);
+          return false;
+        }
+
+        // Applica il filtro file
+        return fileFilterFn(source) && fileFilterFn(target);
+      } catch (err) {
+        console.error("Error processing link entry:", entry, err);
+        return false;
+      }
+    })
+    .map((entry) => ({
+      source: entry.value.page,
+      target: entry.value.toPage,
+    }));
+
+  console.log("links filtered");
+
+  // Costruisci i nodi con i metadati delle pagine
+  const nodes = filteredPages.map((page) => ({
     id: page.name,
-    title: page.name, // Puoi arricchire con ulteriori metadati
-    tags: page.tags || [],
+    title: page.name,
+    tags: page.tags,
     created: page.created,
     lastModified: page.lastModified,
   }));
